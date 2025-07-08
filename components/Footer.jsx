@@ -1,6 +1,13 @@
 'use client';
 
-import { FaShippingFast, FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
+import {
+  FaShippingFast,
+  FaFacebook,
+  FaTwitter,
+  FaInstagram,
+  FaLinkedin,
+  FaWhatsapp
+} from 'react-icons/fa';
 
 export default function Footer() {
   return (
@@ -17,17 +24,18 @@ export default function Footer() {
               Fast and reliable shipping services worldwide. We deliver your packages with care and precision.
             </p>
             <div className="footer-social">
-              <a href="#" className="social-link" aria-label="Facebook">
-                <FaFacebook />
-              </a>
-              <a href="#" className="social-link" aria-label="Twitter">
-                <FaTwitter />
-              </a>
-              <a href="#" className="social-link" aria-label="Instagram">
-                <FaInstagram />
-              </a>
-              <a href="#" className="social-link" aria-label="LinkedIn">
-                <FaLinkedin />
+              <a href="#" className="social-link" aria-label="Facebook"><FaFacebook /></a>
+              <a href="#" className="social-link" aria-label="Twitter"><FaTwitter /></a>
+              <a href="#" className="social-link" aria-label="Instagram"><FaInstagram /></a>
+              <a href="#" className="social-link" aria-label="LinkedIn"><FaLinkedin /></a>
+              <a
+                href="https://wa.me/16614197124"
+                className="social-link"
+                aria-label="WhatsApp"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FaWhatsapp />
               </a>
             </div>
           </div>
@@ -63,8 +71,10 @@ export default function Footer() {
               <p>123 Shipping Avenue</p>
               <p>New York, NY 10001</p>
               <p>Email: <a href="mailto:Omahaairflighteasecargo@gmail.com">Omahaairflighteasecargo@gmail.com</a></p>
-              <p>Phone: <a href="tel:+16614197124">+1 (661) 419-7124 📞</a></p>
-              <p>Whatsapp: <a href="tel:+15551234567">+1 (661) 419-7124📞</a></p>
+              <p>Phone: <a href="tel:+16614197124">+1 (402) 318-3533📞</a></p>
+              <p>Whatsapp: <a href="https://wa.me/16614197124" 
+              className='social link'
+              target="_blank" rel="noopener noreferrer">+1 (661) 419-7124 📞</a></p>
             </address>
           </div>
         </div>
@@ -130,6 +140,10 @@ export default function Footer() {
 
         .social-link:hover {
           color: var(--white);
+        }
+
+        .social-link[aria-label='WhatsApp']:hover {
+          color: #25D366;
         }
 
         .footer-title {

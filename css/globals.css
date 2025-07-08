@@ -358,7 +358,7 @@ textarea.form-input {
 .hero {
   position: relative;
   height: 600px;
-  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('/hero-image.jpg');
+  background: linear-gradient(rgba(214, 2, 2, 0.945), rgba(0, 0, 0, 0.3)), url('/hero-image.jpg');
   background-size: 30rem;
   background-position: center;
   color: var(--white);

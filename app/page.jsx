@@ -8,7 +8,7 @@ export default function Home() {
       <section className="hero">
         <div className="hero-content">
           <h1 className="hero-title">Fast & Reliable Shipping Solutions</h1>
-          <p className="hero-subtitle">Track, send, and manage your packages with our state-of-the-art shipping platform</p>
+          <h1><p className="hero-subtitle">Track, send, and manage your packages with our state-of-the-art shipping platform</p></h1>
           <div className="hero-buttons">
             <div className="hero-buttons">
             <Link href="/send" className="btn btn-primary">Send a Package</Link>

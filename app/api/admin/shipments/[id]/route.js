@@ -3,7 +3,16 @@ import Shipment from '@/models/Shipment';
 import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 
+export const runtime = 'nodejs';
+
 export async function PUT(request, { params }) {
+  if (!process.env.MONGODB_URI) {
+    return NextResponse.json({ error: 'MONGODB_URI is not defined' }, { status: 500 });
+  }
+  if (!process.env.JWT_SECRET) {
+    return NextResponse.json({ error: 'JWT_SECRET is not defined' }, { status: 500 });
+  }
+
   await dbConnect();
 
   try {
@@ -51,4 +60,3 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

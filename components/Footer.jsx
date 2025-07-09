@@ -46,7 +46,6 @@ export default function Footer() {
             <ul className="footer-links">
               <li><a href="/">Home</a></li>
               <li><a href="/about">About Us</a></li>
-              <li><a href="/services">Services</a></li>
               <li><a href="/blog">Blog</a></li>
               <li><a href="/contact">Contact</a></li>
             </ul>
@@ -59,8 +58,6 @@ export default function Footer() {
               <li><a href="/track">Track Package</a></li>
               <li><a href="/send">Send Package</a></li>
               <li><a href="/quote">Get a Quote</a></li>
-              <li><a href="/pricing">Pricing</a></li>
-              <li><a href="/locations">Locations</a></li>
             </ul>
           </div>
 
@@ -81,7 +78,7 @@ export default function Footer() {
 
         {/* Footer Bottom */}
         <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} SwiftShip. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Oma-Airflight. All rights reserved.</p>
           <div className="footer-legal">
             <a href="/privacy">Privacy Policy</a>
             <a href="/terms">Terms of Service</a>

@@ -10,6 +10,8 @@ export default function Navbar() {
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
+  const closeMenu = () => setIsMenuOpen(false)
+
   return (
     <nav className="navbar shadow-soft">
       <div className="container nav-container">
@@ -17,7 +19,7 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/" className="nav-brand">
               <FaShippingFast className="h-8 w-8 text-primary mr-2" />
-              <span className="gradient-text">SwiftShip</span>
+              <span className="gradient-text">Oma-Airflight</span>
             </Link>
           </div>
           {/* Desktop Menu */}
@@ -40,7 +42,7 @@ export default function Navbar() {
                 <Link href="/signup" className="nav-link">Signup</Link>
               </>
             )}
-            <Link href="/quote" className="btn-primary">
+            <Link href="/quote" className="btn btn-primary">
               Get Quote
             </Link>
           </div>
@@ -48,39 +50,35 @@ export default function Navbar() {
           <div className="md:hidden flex items-center">
             <button
               onClick={toggleMenu}
-              className={`nav-toggle ${isMenuOpen ? 'active' : ''}`}
+              className="nav-toggle"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {isMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
           </div>
         </div>
         {/* Mobile Menu */}
         <div className={`nav-links md:hidden ${isMenuOpen ? 'mobile-active' : ''}`}>
-          <Link href="/" className="nav-link">Home</Link>
-          <Link href="/track" className="nav-link">Track</Link>
-          <Link href="/send" className="nav-link">Send</Link>
-          <Link href="/blog" className="nav-link">Blog</Link>
-          <Link href="/contact" className="nav-link">Contact</Link>
+          <Link href="/" className="nav-link" onClick={closeMenu}>Home</Link>
+          <Link href="/track" className="nav-link" onClick={closeMenu}>Track</Link>
+          <Link href="/send" className="nav-link" onClick={closeMenu}>Send</Link>
+          <Link href="/blog" className="nav-link" onClick={closeMenu}>Blog</Link>
+          <Link href="/contact" className="nav-link" onClick={closeMenu}>Contact</Link>
           {user ? (
             <>
               <span className="user-greeting">Welcome, {user.name}</span>
-              <button onClick={logout} className="nav-link">
+              <button onClick={() => { logout(); closeMenu(); }} className="nav-link">
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link href="/login" className="nav-link">Login</Link>
-              <Link href="/signup" className="nav-link">Signup</Link>
+              <Link href="/login" className="nav-link" onClick={closeMenu}>Login</Link>
+              <Link href="/signup" className="nav-link" onClick={closeMenu}>Signup</Link>
             </>
           )}
-          <Link href="/quote" className="btn-primary">
+          <Link href="/quote" className="btn btn-primary" onClick={closeMenu}>
             Get Quote
           </Link>
         </div>

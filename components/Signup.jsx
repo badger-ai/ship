@@ -1,37 +1,52 @@
-// components/Signup.jsx
-'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+'use client';
+import { useState, useEffect } from 'react'; // Add useEffect
+import { useRouter } from 'next/navigation';
 
 export default function Signup() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const router = useRouter()
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const router = useRouter();
+
+  // Redirect after success message
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        router.push('/'); // Redirect to main page (or '/dashboard' if preferred)
+      }, 2000); // 2-second delay to show success message
+      return () => clearTimeout(timer); // Cleanup timer on unmount
+    }
+  }, [success, router]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setError('');
+    setSuccess('');
 
     try {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password })
-      })
+        body: JSON.stringify({ name, email, password }),
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Signup failed')
+        throw new Error(data.error || 'Signup failed');
       }
 
-      router.push('/login')
+      // Set success message
+      setSuccess('Account created successfully!');
+      setName('');
+      setEmail('');
+      setPassword('');
     } catch (err) {
-      setError(err.message)
+      setError(err.message);
     }
-  }
+  };
 
   return (
     <section className="section">
@@ -42,9 +57,12 @@ export default function Signup() {
           </div>
           <div className="card-body">
             {error && <div className="alert alert-error">{error}</div>}
+            {success && <div className="alert alert-success">{success}</div>}
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label className="form-label" htmlFor="name">Full Name</label>
+                <label className="form-label" htmlFor="name">
+                  Full Name
+                </label>
                 <input
                   type="text"
                   id="name"
@@ -55,7 +73,9 @@ export default function Signup() {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label" htmlFor="email">Email</label>
+                <label className="form-label" htmlFor="email">
+                  Email
+                </label>
                 <input
                   type="email"
                   id="email"
@@ -66,7 +86,9 @@ export default function Signup() {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label" htmlFor="password">Password</label>
+                <label className="form-label" htmlFor="password">
+                  Password
+                </label>
                 <input
                   type="password"
                   id="password"
@@ -86,5 +108,5 @@ export default function Signup() {
         </div>
       </div>
     </section>
-  )
+  );
 }

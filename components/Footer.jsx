@@ -18,7 +18,7 @@ export default function Footer() {
           <div className="footer-company">
             <div className="footer-brand">
               <FaShippingFast className="footer-logo" />
-              <span className="footer-brand-name">SwiftShip</span>
+              <span className="footer-brand-name">Oma-Airflight</span>
             </div>
             <p className="footer-description">
               Fast and reliable shipping services worldwide. We deliver your packages with care and precision.

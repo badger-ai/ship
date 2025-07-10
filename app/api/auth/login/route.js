@@ -1,12 +1,21 @@
+import bcrypt from 'bcrypt';
+import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User';
 import jwt from 'jsonwebtoken';
-import { NextResponse } from 'next/server';
+
+export const runtime = 'nodejs';
 
 export async function POST(request) {
-  await dbConnect();
-
   try {
+    if (!process.env.MONGODB_URI) {
+      return NextResponse.json({ error: 'MONGODB_URI is not defined' }, { status: 500 });
+    }
+    if (!process.env.JWT_SECRET) {
+      return NextResponse.json({ error: 'JWT_SECRET is not defined' }, { status: 500 });
+    }
+
+    await dbConnect();
     const { email, password } = await request.json();
 
     if (!email || !password) {
@@ -14,16 +23,17 @@ export async function POST(request) {
     }
 
     const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user || !(await user.comparePassword(password))) {
+    if (!user) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    if (!process.env.JWT_SECRET) {
-      throw new Error('JWT_SECRET is not defined');
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
     const token = jwt.sign(
-      { userId: user._id, role: user.role },
+      { userId: user._id, role: user.role || 'user' },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -35,10 +45,11 @@ export async function POST(request) {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: user.role || 'user',
       },
     });
   } catch (error) {
+    console.error('Login Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

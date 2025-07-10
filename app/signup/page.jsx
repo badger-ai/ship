@@ -1,7 +1,7 @@
-// app/signup/page.jsx
+// app/login/page.jsx
 'use client'
 import Signup from '@/components/Signup'
 
 export default function SignupPage() {
-  return <Signup />
+  return <Signup/>
 }

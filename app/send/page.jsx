@@ -1,139 +1,159 @@
-// components/SendPackage.jsx
-'use client'
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/components/AuthProvider'
+'use client';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/components/AuthProvider';
 
 export default function SendPackage() {
-  const { user, loading } = useAuth()
-  const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState('')
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({
     sender: {
       name: user?.name || '',
       address: '',
       email: user?.email || '',
-      phone: ''
+      phone: '',
     },
     receiver: {
       name: '',
       address: '',
       email: '',
-      phone: ''
+      phone: '',
     },
     package: {
       description: '',
       weight: '',
       dimensions: { length: '', width: '', height: '' },
-      value: ''
-    }
-  })
+      value: '',
+    },
+  });
 
-  // Update formData when user changes
+  useEffect(() => {
+    if (!loading && !user) {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.log('No token, redirecting to login');
+        setError('Please log in to send a package');
+        router.push('/login');
+        return;
+      }
+      fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.success) {
+            console.error('Invalid token, redirecting to login:', data.error);
+            localStorage.removeItem('token');
+            setError('Session expired. Please log in again.');
+            router.push('/login');
+          }
+        })
+        .catch((err) => {
+          console.error('Error validating token:', err);
+          localStorage.removeItem('token');
+          setError('Session error. Please log in again.');
+          router.push('/login');
+        });
+    }
+  }, [user, loading, router]);
+
   useEffect(() => {
     if (user) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         sender: {
           ...prev.sender,
           name: user.name || prev.sender.name,
-          email: user.email || prev.sender.email
-        }
-      }))
+          email: user.email || prev.sender.email,
+        },
+      }));
     }
-  }, [user])
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!loading && !user && !localStorage.getItem('token')) {
-      setError('Please log in to send a package')
-      router.push('/login')
-    }
-  }, [user, loading, router])
+  }, [user]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    const parsedValue = name.startsWith('dimensions.') || name === 'package.weight' || name === 'package.value'
-      ? value === '' ? '' : parseFloat(value) || ''
-      : value
+    const { name, value } = e.target;
+    const parsedValue =
+      name.startsWith('dimensions.') || name === 'package.weight' || name === 'package.value'
+        ? value === '' ? '' : parseFloat(value) || ''
+        : value;
 
-    setFormData(prev => {
+    setFormData((prev) => {
       if (name.startsWith('sender.') || name.startsWith('receiver.')) {
-        const [parent, child] = name.split('.')
+        const [parent, child] = name.split('.');
         return {
           ...prev,
           [parent]: {
             ...prev[parent],
-            [child]: parsedValue
-          }
-        }
+            [child]: parsedValue,
+          },
+        };
       } else if (name.startsWith('package.')) {
-        const [_, child] = name.split('.')
+        const [, child] = name.split('.');
         return {
           ...prev,
           package: {
             ...prev.package,
-            [child]: parsedValue
-          }
-        }
+            [child]: parsedValue,
+          },
+        };
       } else if (name.startsWith('dimensions.')) {
-        const dim = name.split('.')[1]
+        const dim = name.split('.')[1];
         return {
           ...prev,
           package: {
             ...prev.package,
             dimensions: {
               ...prev.package.dimensions,
-              [dim]: parsedValue
-            }
-          }
-        }
+              [dim]: parsedValue,
+            },
+          },
+        };
       }
-      return prev
-    })
-
-    console.log('Input changed:', { name, value, parsedValue })
-  }
+      return prev;
+    });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setError('')
-    
-    console.log('Submitting formData:', JSON.parse(JSON.stringify(formData)))
-    
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+
     try {
-      const token = localStorage.getItem('token')
+      const token = localStorage.getItem('token');
       if (!token) {
-        throw new Error('No authentication token found. Please log in.')
+        throw new Error('No authentication token found. Please log in.');
       }
       const res = await fetch('/api/shipments', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData)
-      })
-      
-      const data = await res.json()
-      
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to create shipment')
+        throw new Error(data.error || 'Failed to create shipment');
       }
-      
-      router.push(`/tracking/${data.trackingNumber}`)
+
+      router.push(`/tracking/${data.trackingNumber}`);
     } catch (err) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   if (loading) {
-    return <div>Loading...</div>
+    return <div className="min-h-screen bg-white">Loading...</div>;
+  }
+
+  if (!user) {
+    return null; // Redirecting to /login
   }
 
   return (
@@ -145,7 +165,6 @@ export default function SendPackage() {
           </div>
           <div className="card-body">
             {error && <div className="alert alert-error">{error}</div>}
-            
             <form onSubmit={handleSubmit}>
               <div className="form-section">
                 <h2>Sender Information</h2>
@@ -200,7 +219,6 @@ export default function SendPackage() {
                   </div>
                 </div>
               </div>
-
               <div className="form-section">
                 <h2>Receiver Information</h2>
                 <div className="form-grid">
@@ -254,7 +272,6 @@ export default function SendPackage() {
                   </div>
                 </div>
               </div>
-
               <div className="form-section">
                 <h2>Package Details</h2>
                 <div className="form-grid">
@@ -298,7 +315,6 @@ export default function SendPackage() {
                         min="0"
                         step="0.1"
                         required
-                        key="dimensions-length"
                       />
                       <input
                         type="number"
@@ -311,7 +327,6 @@ export default function SendPackage() {
                         min="0"
                         step="0.1"
                         required
-                        key="dimensions-width"
                       />
                       <input
                         type="number"
@@ -324,7 +339,6 @@ export default function SendPackage() {
                         min="0"
                         step="0.1"
                         required
-                        key="dimensions-height"
                       />
                     </div>
                   </div>
@@ -344,7 +358,6 @@ export default function SendPackage() {
                   </div>
                 </div>
               </div>
-
               <div className="form-actions">
                 <button type="submit" className="btn btn-primary btn-block" disabled={isSubmitting}>
                   {isSubmitting ? 'Processing...' : 'Ship Package'}
@@ -355,5 +368,5 @@ export default function SendPackage() {
         </div>
       </div>
     </section>
-  )
+  );
 }

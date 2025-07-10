@@ -27,7 +27,9 @@ export default function About() {
 we connect lives, dreams, and opportunities across continents.</p>
           <h2 className="text-2xl font-semibold mt-8">Our Values</h2>
           <ul className="list-disc pl-6 space-y-2">
-            <li>Reliability - We deliver on our promises</li>
+            <li className="flex items-center transition-transform hover:scale-105">
+  <span className="mr-2 animate-spin-slow">🔄</span>Reliability - We deliver on our promises
+</li>
             <li>Transparency - Real-time tracking for all shipments</li>
             <li>Customer Service - Available 24/7 to assist you</li>
             <li>Innovation - Constantly improving our services</li>

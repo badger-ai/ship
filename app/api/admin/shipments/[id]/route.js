@@ -1,62 +1,95 @@
+import { NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/dbConnect';
 import Shipment from '@/models/Shipment';
-import jwt from 'jsonwebtoken';
-import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 
-export async function PUT(request, { params }) {
-  if (!process.env.MONGODB_URI) {
-    return NextResponse.json({ error: 'MONGODB_URI is not defined' }, { status: 500 });
-  }
-  if (!process.env.JWT_SECRET) {
-    return NextResponse.json({ error: 'JWT_SECRET is not defined' }, { status: 500 });
-  }
-
-  await dbConnect();
-
+export async function GET(request, { params }) {
   try {
-    const bearer = request.headers.get('authorization')?.split(' ')[1];
-    if (!bearer) {
-      return NextResponse.json({ error: 'Missing or invalid authorization token' }, { status: 401 });
+    if (!process.env.MONGODB_URI) {
+      console.error('MONGODB_URI is not defined');
+      return NextResponse.json({ error: 'MONGODB_URI is not defined' }, { status: 500 });
+    }
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not defined');
+      return NextResponse.json({ error: 'JWT_SECRET is not defined' }, { status: 500 });
     }
 
-    const decoded = jwt.verify(bearer, process.env.JWT_SECRET);
-    if (decoded.role !== 'admin') {
+    await dbConnect();
+    const bearer = request.headers.get('authorization')?.split(' ')[1];
+    if (!bearer) {
+      console.error('Missing authorization token');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = params;
-    const { status, location, description } = await request.json();
-
-    if (!status || !location || !description) {
-      return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
+    let decoded;
+    try {
+      decoded = jwt.verify(bearer, process.env.JWT_SECRET);
+      if (decoded.role !== 'admin') {
+        console.error('User is not an admin:', decoded.userId);
+        return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+      }
+    } catch (error) {
+      console.error('JWT verification failed:', error.message);
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const shipment = await Shipment.findByIdAndUpdate(
-      id,
-      {
-        $set: { status },
-        $push: {
-          history: {
-            status,
-            location,
-            description,
-            date: new Date(),
-          }
-        }
-      },
-      { new: true }
-    );
-
+    const shipment = await Shipment.findById(params.id);
     if (!shipment) {
+      console.error(`Shipment not found: ${params.id}`);
       return NextResponse.json({ error: 'Shipment not found' }, { status: 404 });
     }
 
+    console.log('Shipment fetched:', params.id);
     return NextResponse.json({ success: true, shipment });
-
   } catch (error) {
-    console.error('Shipment Update Error:', error);
+    console.error('Error fetching shipment:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function PUT(request, { params }) {
+  try {
+    if (!process.env.MONGODB_URI) {
+      console.error('MONGODB_URI is not defined');
+      return NextResponse.json({ error: 'MONGODB_URI is not defined' }, { status: 500 });
+    }
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not defined');
+      return NextResponse.json({ error: 'JWT_SECRET is not defined' }, { status: 500 });
+    }
+
+    await dbConnect();
+    const bearer = request.headers.get('authorization')?.split(' ')[1];
+    if (!bearer) {
+      console.error('Missing authorization token');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(bearer, process.env.JWT_SECRET);
+      if (decoded.role !== 'admin') {
+        console.error('User is not an admin:', decoded.userId);
+        return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
+      }
+    } catch (error) {
+      console.error('JWT verification failed:', error.message);
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    const data = await request.json();
+    const shipment = await Shipment.findByIdAndUpdate(params.id, data, { new: true });
+    if (!shipment) {
+      console.error(`Shipment not found: ${params.id}`);
+      return NextResponse.json({ error: 'Shipment not found' }, { status: 404 });
+    }
+
+    console.log('Shipment updated:', params.id);
+    return NextResponse.json({ success: true, shipment });
+  } catch (error) {
+    console.error('Error updating shipment:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

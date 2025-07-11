@@ -1,32 +1,32 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/components/AuthProvider';
 
 export default function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { setUser } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email: email.trim(), password }),
       });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || 'Signup failed');
       }
-      // Store token in localStorage
       localStorage.setItem('token', data.token);
-      // Redirect to home after 2 seconds
-      setTimeout(() => {
-        router.push('/');
-      }, 2000);
+      setUser(data.user);
+      setTimeout(() => router.push('/'), 2000);
     } catch (err) {
       setError(err.message);
     }
@@ -41,7 +41,7 @@ export default function Signup() {
         <form onSubmit={handleSubmit} className="form-container">
           {error && <div className="alert alert-error">{error}</div>}
           <div className="form-group">
-            <label htmlFor="name" className="form-label">Name</label>
+            <label htmlFor="name" className="form-label">Full Name</label>
             <input
               type="text"
               id="name"

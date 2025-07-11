@@ -16,7 +16,10 @@ export async function POST(request) {
       return NextResponse.json({ error: 'JWT_SECRET is not defined' }, { status: 500 });
     }
 
-    await dbConnect();
+    await dbConnect().catch((err) => {
+      console.error('MongoDB connection failed:', err.message);
+      throw new Error('Database connection failed');
+    });
     const { name, email, password } = await request.json();
     console.log('Signup attempt:', { email });
 
@@ -51,7 +54,7 @@ export async function POST(request) {
       },
     }, { status: 201 });
   } catch (error) {
-    console.error('Signup Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Signup Error:', error.message);
+    return NextResponse.json({ error: 'Authentication failed: ' + error.message }, { status: 500 });
   }
 }

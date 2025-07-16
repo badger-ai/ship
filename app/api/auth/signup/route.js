@@ -16,10 +16,13 @@ export async function POST(request) {
       return NextResponse.json({ error: 'JWT_SECRET is not defined' }, { status: 500 });
     }
 
-    await dbConnect().catch((err) => {
-      console.error('MongoDB connection failed:', err.message);
-      throw new Error('Database connection failed');
-    });
+    try {
+      await dbConnect()
+    } catch (error) {
+      console.log(error)
+      return NextResponse.json({error:"connection error"})
+    }
+
     const { name, email, password } = await request.json();
     console.log('Signup attempt:', { email });
 

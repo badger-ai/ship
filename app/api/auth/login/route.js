@@ -7,33 +7,26 @@ export const runtime = 'nodejs';
 
 export async function POST(request) {
   try {
-    if (!process.env.MONGODB_URI) {
-      console.error('MONGODB_URI is not defined');
-      return NextResponse.json({ error: 'MONGODB_URI is not defined' }, { status: 500 });
-    }
-    if (!process.env.JWT_SECRET) {
-      console.error('JWT_SECRET is not defined');
-      return NextResponse.json({ error: 'JWT_SECRET is not defined' }, { status: 500 });
+    if (!process.env.MONGODB_URI || !process.env.JWT_SECRET) {
+      return NextResponse.json({ error: 'Env vars missing' }, { status: 500 });
     }
 
-    await dbConnect();
-    const { email, password } = await request.json();
-    console.log('Login attempt:', { email });
+    await dbConnect(); // this MUST fully complete before anything else
+
+    const body = await request.json();
+    const { email, password } = body;
 
     if (!email || !password) {
-      console.error('Missing email or password');
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
     }
 
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      console.error(`User not found for email: ${email.toLowerCase()}`);
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
-    const isValidPassword = await user.comparePassword(password);
-    if (!isValidPassword) {
-      console.error(`Invalid password for user: ${email.toLowerCase()}`);
+    const isValid = await user.comparePassword(password);
+    if (!isValid) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
@@ -43,7 +36,6 @@ export async function POST(request) {
       { expiresIn: '7d' }
     );
 
-    console.log('Login successful:', { userId: user._id, email: user.email });
     return NextResponse.json({
       success: true,
       token,
@@ -56,6 +48,6 @@ export async function POST(request) {
     });
   } catch (error) {
     console.error('Login Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Login failed: ' + error.message }, { status: 500 });
   }
 }
